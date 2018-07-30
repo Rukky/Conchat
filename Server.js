@@ -1,24 +1,41 @@
 var express = require('express');
+var createError = require('http-errors');
 var app = express();
 var http = require('http').Server(app);
 var io = require("socket.io")(http);
 var path = require('path');
-var { fork} = require('child_process');
+var Redis = require('ioredis');
+
+
+
+var cluster = new Redis.Cluster([{
+  port: 6379,
+  host: 'localhost'
+}]);
+cluster.on('error',function (err) {
+    console.log("REDIS CONNECT error "+ err);
+    console.log('node error', err.lastNodeError);
+});
+
+cluster.connect();
+
 
 var indexRouter = require('./routes/index');
 
-htt
+
 
 http.listen('8000', function(){
   console.log("working");
 });
 
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('/', function(req, res){
-  res.sendFile('index.html');
-});
 
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/', indexRouter);
+app.use(function(req, res, next) {
+  next(createError(404));
+});
 
 var numUsers = 0;
 var usernames ={};
