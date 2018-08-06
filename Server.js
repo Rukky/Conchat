@@ -5,6 +5,11 @@ var express = require('express')
   , io = require('socket.io').listen(server);
 
 server.listen(8000);
+console.log("Listening")
+var usernames = {};
+
+var rooms = [];
+
 
 // routing
 app.use(express.static('public'));
@@ -12,11 +17,13 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/Public/Index.html');
 });
 
+app.get('/Chatrooms', function (req, res){
+
+    res.sendFile(__dirname + '/Public/Chat.html');
+
+})
+
 // usernames which are currently connected to the chat
-var usernames = {};
-
-var rooms = [];
-
 io.sockets.on('connection', function(socket) {
     socket.on('adduser', function(data) {
       var username = data.username;
@@ -43,7 +50,6 @@ if (rooms.indexOf(room) != -1) {
         data.room = new_room;
         socket.emit('updatechat', 'SERVER', 'Your room is ready, invite someone using this ID:' + new_room);
         socket.emit('roomcreated', data);
-        console.log('room created:'+ data)
     });
 
     socket.on('sendchat', function(data) {
@@ -62,10 +68,12 @@ if (rooms.indexOf(room) != -1) {
         socket.emit('updaterooms', rooms, newroom);
     });
 
-    socket.on('disconnect', function() {
+    socket.on('disconnect', function () {
         delete usernames[socket.username];
         io.sockets.emit('updateusers', usernames);
-        socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-        socket.leave(socket.room);
+        if (socket.username !== undefined) {
+            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+            socket.leave(socket.room);
+        }
     });
  });

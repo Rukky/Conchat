@@ -2,33 +2,12 @@
 <html>
   <head>
     <title>Socket.IO chat</title>
-      <link rel="stylesheet" href="/style.css">
+      <link rel="stylesheet" href="/IndexStyle.css">
   </head>
 <body>
-  <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-         <b>ROOMS</b>
-         <div id="rooms"></div>
-     </div>
-
-     <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-         <div id="conversation"></div>
-         <input id="data" style="width:200px;" />
-         <input type="button" id="datasend" value="send" />
-     </div>
-
-    <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-        <div id="room creation"></div>
-        <input id="roomname" style="width:200px;" />
-         <input type="button" id="roombutton" value="create room" />
-    </div>
-    <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-        <div id="room creation"></div>
-        <input id='username'>
-        <input id="Joinroom" style="width:200px;" />
-         <input type="button" id="joinbutton" value="join room" />
-    </div>
- <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<button id='redirect' type="button"> Create a chat room</button>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script src="client.js"></script>
+<script src="/IndexClient.js"></script>
 </body>
 </html>

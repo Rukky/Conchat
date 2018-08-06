@@ -1,4 +1,9 @@
+
+
+
 var socket = io.connect();
+
+
 	// on connection to server, ask for user's name with an anonymous callback
   socket.on('connect', function(){
 });
@@ -33,14 +38,14 @@ $(function(){
          data.username = $('#roomname').val();
         $('#roomname').val('');
         socket.emit('create', data)
-        console.log("client" + data)
     });
     $('#joinbutton').click(function(){
-        var name = $('#username').val();
-        $('#roomname').val('');
-        var room = $('#').val();
+        data.username = $('#username').val();
+        $('#username').val('');
+        data.room = $('#Joinroom').val();
         $('#Joinroom').val('');
 
-        socket.emit('adduser', name, room)
+        socket.emit('adduser', data)
+        console.log(data)
     });
 });
