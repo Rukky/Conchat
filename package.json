@@ -5,12 +5,15 @@
   "main": "Server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "npm run server",
+    "server": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.2",
+    "coffeescript": "^2.3.1",
+    "express": "^4.16.3",
+    "express.io": "^1.1.13",
     "ioredis": "^3.2.2",
     "redis": "^2.8.0",
     "redis-hashes": "^0.6.1",

@@ -1,8 +1,9 @@
-
-window.onload = function () {
-    var ID = Math.random().toString(36).substring(2, 15);
-    document.getElementById("redirect").onclick = function () {
-       window.location= 'http://localhost:8000/'+ ID;
-   }
-   console.log(ID);
-};
+$(function () {
+  var socket = io.connect('http://localhost:8000');
+$('#redirect').click(function(data){
+  socket.emit('createroom', data);
+});
+socket.on('redirect', function (destination) {
+ window.location.href = destination;
+});
+});

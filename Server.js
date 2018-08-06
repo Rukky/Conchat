@@ -1,72 +1,71 @@
-var express = require('express');
-var createError = require('http-errors');
-var app = express();
-var http = require('http').Server(app);
-var io = require("socket.io")(http);
-var path = require('path');
-var Redis = require('ioredis');
+var express = require('express')
+  , app = express()
+  , http = require('http')
+  , server = http.createServer(app)
+  , io = require('socket.io').listen(server);
 
+server.listen(8000);
 
-
-var cluster = new Redis.Cluster([{
-  port: 6379,
-  host: 'localhost'
-}]);
-cluster.on('error',function (err) {
-    console.log("REDIS CONNECT error "+ err);
-    console.log('node error', err.lastNodeError);
+// routing
+app.use(express.static('public'));
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/Public/Index.html');
 });
 
-cluster.connect();
+// usernames which are currently connected to the chat
+var usernames = {};
+
+var rooms = [];
+
+io.sockets.on('connection', function(socket) {
+    socket.on('adduser', function(data) {
+      var username = data.username;
+      var room = data.room;
+        console.log(data);
+if (rooms.indexOf(room) != -1) {
+              socket.username = username;
+              socket.room = room;
+              usernames[username] = username;
+              socket.join(room);
+
+              socket.emit('updatechat', 'SERVER', 'You are connected. Start chatting');
+              socket.broadcast.to(room).emit('updatechat', 'SERVER', username + ' has connected to this room');
+
+            } else {
+        socket.emit('updatechat', 'SERVER', 'Please enter valid code.');
+      }
+      });
 
 
-var indexRouter = require('./routes/index');
-
-
-
-http.listen('8000', function(){
-  console.log("working");
-});
-
-
-
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', indexRouter);
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-var numUsers = 0;
-var usernames ={};
-
-io.on('connection', function(socket){
-  var addedUser = false;
-  console.log('a user has connected');
-  socket.on('disconnect', function(){
-    if(addedUser){
-      --numUsers;
-    }
-    io.emit('user left', {
-      username: socket.username,
-      numUsers:numUsers
+    socket.on('create', function(data) {
+        var new_room = ("" + Math.random()).substring(2, 7);
+        rooms.push(new_room);
+        data.room = new_room;
+        socket.emit('updatechat', 'SERVER', 'Your room is ready, invite someone using this ID:' + new_room);
+        socket.emit('roomcreated', data);
+        console.log('room created:'+ data)
     });
-    console.log('a user has disconnected');
-  });
-  socket.on('adduser', function(username){
-    if(addedUser) return;
-    socket.username = username;
-  usernames[username] = username;
-  ++numUsers;
-  addedUser = true
-});
-socket.on('new message', function(msg){
-io.sockets.emit('new message', socket.username, msg);
-});
 
+    socket.on('sendchat', function(data) {
+        io.sockets["in"](socket.room).emit('updatechat', socket.username, data);
+    });
 
-});
-module.exports = app;
+    socket.on('switchRoom', function(newroom) {
+        var oldroom;
+        oldroom = socket.room;
+        socket.leave(socket.room);
+        socket.join(newroom);
+        socket.emit('updatechat', 'SERVER', 'you have connected to ' + newroom);
+        socket.broadcast.to(oldroom).emit('updatechat', 'SERVER', socket.username + ' has left this room');
+        socket.room = newroom;
+        socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username + ' has joined this room');
+        socket.emit('updaterooms', rooms, newroom);
+    });
 
-
-// http://psitsmike.com/2011/09/node-js-and-socket-io-chat-tutorial/
+    socket.on('disconnect', function() {
+        delete usernames[socket.username];
+        io.sockets.emit('updateusers', usernames);
+        socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+        socket.leave(socket.room);
+    });
+ });
