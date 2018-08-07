@@ -6,7 +6,6 @@ var express = require('express')
 
 server.listen(8000);
 console.log("Listening")
-var usernames = {};
 
 var rooms = [];
 
@@ -17,63 +16,36 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/Public/Index.html');
 });
 
-app.get('/Chatrooms', function (req, res){
+app.get(/(^\/[a-zA-Z0-9\-]+$)/, function (req, res){
 
     res.sendFile(__dirname + '/Public/Chat.html');
 
 })
-
+var usernames = {};
+console.log(usernames);
 // usernames which are currently connected to the chat
-io.sockets.on('connection', function(socket) {
-    socket.on('adduser', function(data) {
-      var username = data.username;
-      var room = data.room;
-        console.log(data);
-if (rooms.indexOf(room) != -1) {
-              socket.username = username;
-              socket.room = room;
-              usernames[username] = username;
-              socket.join(room);
+io.on('connection', function(socket){
 
-              socket.emit('updatechat', 'SERVER', 'You are connected. Start chatting');
-              socket.broadcast.to(room).emit('updatechat', 'SERVER', username + ' has connected to this room');
+    socket.on('join', function (room, username) {
+      socket.username= username;
 
-            } else {
-        socket.emit('updatechat', 'SERVER', 'Please enter valid code.');
-      }
-      });
-
-
-    socket.on('create', function(data) {
-        var new_room = ("" + Math.random()).substring(2, 7);
-        rooms.push(new_room);
-        data.room = new_room;
-        socket.emit('updatechat', 'SERVER', 'Your room is ready, invite someone using this ID:' + new_room);
-        socket.emit('roomcreated', data);
+        //May be do some authorization
+        socket.join(room);
+        socket.room= room;
+        usernames[username] = username;
+        socket.emit('chat message', "connected to" + room)
+        socket.broadcast.to(room).emit("chat message", username +' has connected to this room');
+        console.log(socket.id, "joined", room);
     });
 
-    socket.on('sendchat', function(data) {
-        io.sockets["in"](socket.room).emit('updatechat', socket.username, data);
+    socket.on('leave', function (room) {
+        //May be do some authorization
+        socket.leave(room);
+        console.log(socket.id, "left", room);
     });
+    socket.on('chat message', function (msg) {
+        //May be do some authorization
+        io.sockets.in(socket.room).emit("chat message", msg, socket.username);
 
-    socket.on('switchRoom', function(newroom) {
-        var oldroom;
-        oldroom = socket.room;
-        socket.leave(socket.room);
-        socket.join(newroom);
-        socket.emit('updatechat', 'SERVER', 'you have connected to ' + newroom);
-        socket.broadcast.to(oldroom).emit('updatechat', 'SERVER', socket.username + ' has left this room');
-        socket.room = newroom;
-        socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username + ' has joined this room');
-        socket.emit('updaterooms', rooms, newroom);
     });
-
-    socket.on('disconnect', function () {
-        delete usernames[socket.username];
-        io.sockets.emit('updateusers', usernames);
-        if (socket.username !== undefined) {
-            socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
-            socket.leave(socket.room);
-        }
-    });
- });
+});
