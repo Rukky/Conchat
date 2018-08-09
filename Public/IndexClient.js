@@ -1,8 +1,8 @@
 $(function () {
 $('#change').click(function(){
-  var room = $("#vary").val();
-  console.log(room);
-  window.location="http://localhost:8000/" + room;
+  var id = Math.random().toString(36).substring(7);
+  console.log(id);
+  window.location="http://localhost:8000/" + id;
   return false;
 });
 

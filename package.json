@@ -17,7 +17,9 @@
     "ioredis": "^3.2.2",
     "redis": "^2.8.0",
     "redis-hashes": "^0.6.1",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "socket.io-client": "^2.1.1",
+    "socket.io-redis": "^5.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.3"
