@@ -1,9 +1,31 @@
 $(function () {
-   var socket = io();
+  var socket = io({
+     'reconnection': true,
+     'reconnectionDelay': 1000,
+     'reconnectionDelayMax' : 5000,
+     'reconnectionAttempts': 5
+ });
    socket.on('connect', function(){
-        socket.emit("join", location.pathname, prompt("name?"));
+        socket.emit("addUser", prompt("name?"), function(data){
+          if(data){
+            alert('not taken');
+          }else{
+            alert('taken');
+          }
+        });
+});
+socket.on("addedUser", function(){
+  socket.emit( "join", location.pathname);
+});
+socket.on('usernames', function(data){
+    var html ='';
+  for(i=0; i<data.length; i++){
+    html += data[i] + '<br/>'
+    $('#users').html(html);
+  }
+  console.log(data)
 
-   });
+})
    $('form').submit(function(){
      socket.emit('chat message', $('#m').val());
      $('#m').val('');

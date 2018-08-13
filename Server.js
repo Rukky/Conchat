@@ -1,3 +1,9 @@
+//Keep alive ping?
+//display users in chat room
+
+
+
+
 var cluster = require('cluster')
 const numCPUs = require('os').cpus().length;
 
@@ -8,8 +14,8 @@ const numCPUs = require('os').cpus().length;
 
     var server = require('http').createServer();
    var io = require('socket.io').listen(server);
-   var redis = require('socket.io-redis');
-    io.adapter(redis({ host: 'localhost', port: 6379 }));
+   var Socketredis = require('socket.io-redis');
+    io.adapter(Socketredis({ host: 'localhost', port: 6379 }));
 
 
 
@@ -23,15 +29,24 @@ for (let i = 0; i < numCPUs; i++) {
     console.log(`worker ${worker.process.pid} died`);
   });
   } else {
+
     var express = require('express');
       var app = express();
 
         var http = require('http');
         var server = http.createServer(app);
        var io = require('socket.io').listen(server);
-       var redis = require('socket.io-redis');
-       io.adapter(redis({ host: 'localhost', port: 6379}));
+       var Socketredis = require('socket.io-redis');
+       var SocketAntiSpam  = require('socket-anti-spam');
+       io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
+       const socketAntiSpam = new SocketAntiSpam({
+  banTime:            30,         // Ban time in minutes
+  kickThreshold:      15,          // User gets kicked after this many spam score
+  kickTimesBeforeBan: 3,          // User gets banned after this many kicks
+  banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
+  io:               io,  // Bind the socket.io variable
+})
 
 
        var rooms = [];
@@ -48,33 +63,54 @@ for (let i = 0; i < numCPUs; i++) {
            res.sendFile(__dirname + '/Public/Chat.html');
 
        })
-       var usernames = {};
-       // usernames which are currently connected to the chat
+       var users = {};
+
 
        io.on('connection', function(socket){
+             socket.on('addUser', function (data, callback) {
+             if (data in users){
+               socket.emit('chat message', "username is taken")
+             } else {
+              socket.username = data;
+              users[socket.username] = socket;
+              socket.emit('addedUser');
+              socketAntiSpam.authenticate(socket);
+              updateUsers();
+            }
+});
+function updateUsers(){
+                io.sockets.in(socket.room).emit('usernames', Object.keys(users) );
 
-           socket.on('join', function (room, username) {
-               socket.username = username;
-               //May be do some authorization
-               socket.join(room);
-               socket.room= room;
-               usernames[username] = username;
-               console.log(usernames)
-               socket.emit('chat message', "connected to" + room, cluster.worker.id)
-               socket.broadcast.to(room).emit("chat message", username +' has connected to this room', cluster.worker.id);
-               console.log(socket.id, "joined", room);
+}
+               socket.on('join', function(room){
+                 socket.join(room);
+                 socket.room= room;
+                 socket.emit('chat message', "connected", + process.pid)
+                 socket.broadcast.to(room).emit("chat message", socket.username+' has connected to this room', cluster.worker.id);
+                 io.in(socket.room).clients((err, clients) => {
+                    users[clients] =socket;
+                 // an array containing socket ids in 'room3'
+               });
+       })
+       socketAntiSpam.event.on('authenticate', socket => {
 
+})
+socketAntiSpam.event.on('kick', (socket, data) => {
+  socket.emit('chat message', "You have been kicked for spamming. You may reconnect and don't spam!")
 
+  console.log(data)
+})
+socketAntiSpam.event.on('ban', (socket, data) => {
+  socket.emit('chat message', "You have been Temporarily banned for spamming, You may reconnect shortly and don't spam!")
 
+})
 
-
-           });
 
 
            socket.on('disconnect', function () {
                //May be do some authorization
-               socket.broadcast.to(socket.room).emit("chat message", socket.username +' has disconnected', cluster.worker.id);
-               delete usernames[socket.username];
+               socket.broadcast.to(socket.room).emit("chat message", socket.username +' has disconnected', +process.pid);
+               delete users[socket.username];
                socket.leave(socket.room);
                console.log(socket.id, "left", socket.room);
            });
@@ -83,6 +119,9 @@ for (let i = 0; i < numCPUs; i++) {
                io.sockets.in(socket.room).emit("chat message", msg, socket.username);
 
            });
+           socket.on('reconnect', function(){
+             console.log("reconnecting")
+           })
        });
        server.listen(8000);
        console.log("Listening")
