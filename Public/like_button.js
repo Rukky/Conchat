@@ -2,10 +2,10 @@
 
 const e = React.createElement;
 
-class LikeButton extends React.Component {
+class NameForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { liked: false };
+    this.state = { value: ''};
   }
 
   render() {

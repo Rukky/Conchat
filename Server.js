@@ -1,9 +1,6 @@
 //Keep alive ping?
 //display users in chat room
 
-
-
-
 var cluster = require('cluster')
 const numCPUs = require('os').cpus().length;
 
