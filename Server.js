@@ -35,6 +35,10 @@ for (let i = 0; i < numCPUs; i++) {
        var io = require('socket.io').listen(server);
        var Socketredis = require('socket.io-redis');
        var SocketAntiSpam  = require('socket-anti-spam');
+       var redis = require('redis');
+       var redisClient = redis.createClient({ "host": "127.0.0.1", "port": 6379 }
+);
+
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
        const socketAntiSpam = new SocketAntiSpam({
@@ -66,8 +70,9 @@ for (let i = 0; i < numCPUs; i++) {
        io.on('connection', function(socket){
              socket.on('addUser', function (data, callback) {
              if (data in users){
-               socket.emit('chat message', "username is taken")
+               callback(false);
              } else {
+               callback(true);
               socket.username = data;
               users[socket.username] = socket;
               socket.emit('addedUser');
@@ -82,11 +87,11 @@ function updateUsers(){
                socket.on('join', function(room){
                  socket.join(room);
                  socket.room= room;
-                 socket.emit('chat message', "connected", + process.pid)
-                 socket.broadcast.to(room).emit("chat message", socket.username+' has connected to this room', cluster.worker.id);
+                 socket.emit('you joined')
+                 socket.broadcast.to(room).emit('user joined', {
+                   username: socket.username});
                  io.in(socket.room).clients((err, clients) => {
                     users[clients] =socket;
-                 // an array containing socket ids in 'room3'
                });
        })
        socketAntiSpam.event.on('authenticate', socket => {
@@ -106,19 +111,50 @@ socketAntiSpam.event.on('ban', (socket, data) => {
 
            socket.on('disconnect', function () {
                //May be do some authorization
-               socket.broadcast.to(socket.room).emit("chat message", socket.username +' has disconnected', +process.pid);
+               socket.broadcast.to(socket.room).emit('user left', {
+                 username:socket.username
+               });
                delete users[socket.username];
                socket.leave(socket.room);
                console.log(socket.id, "left", socket.room);
            });
-           socket.on('chat message', function (msg) {
-               //May be do some authorization
-               io.sockets.in(socket.room).emit("chat message", msg, socket.username);
+           socket.on('Send Message', function (data, callback) {
+             redisClient.lpush('messages', JSON.stringify(data)); // push into redis
+            redisClient.lrange('messages', 0, 99, function(err, reply) {
+            }
+             console.log(data)
+             var msg = data.trim();
+             if(msg.substr(0,3) === '/w '){
+               msg = msg.substr(3);
+               var ind = msg.toString().indexOf(' ');
+               if(ind !== -1){
+                  console.log('Whisper')
+                 var name = msg.substring(0, ind);
+                 var msg = msg.substring(ind + 1);
+                 if(name in users){
+                   users[name].emit("Private message", {
+                     username:socket.username,
+                     message:msg
+                   });
+                   socket.emit("Private message",{
+                     username:socket.username,
+                     message:msg
+                   });
 
+                 }
+                 else{
+                   callback('Please enter a valid user');
+                 }
+               }else{
+                 callback('Please enter a message')
+               }
+             }else {
+               //May be do some authorization
+              io.sockets.in(socket.room).emit("chat message", {
+                 username: socket.username,
+                   message: msg});
+}
            });
-           socket.on('reconnect', function(){
-             console.log("reconnecting")
-           })
        });
        server.listen(8000);
        console.log("Listening")

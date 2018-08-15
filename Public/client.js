@@ -5,14 +5,27 @@ $(function () {
      'reconnectionDelayMax' : 5000,
      'reconnectionAttempts': 5
  });
+ var $userError = $('#UserError');
+ var $messages = $('.messages');
+ var $m = $('#m').val(); // Messages area
+
+ var id = Math.floor((Math.random() * 10000) + 1);
    socket.on('connect', function(){
-        socket.emit("addUser", prompt("name?"), function(data){
-          if(data){
-            alert('not taken');
-          }else{
-            alert('taken');
-          }
-        });
+});
+
+document.getElementById('Name').value = "Guest" +id ;
+
+$('#Username').submit(function(e){
+  e.preventDefault();
+  socket.emit("addUser", $("#Name").val(),  function(data){
+  if(data){
+    $("#UserWrap").hide();
+    $("#chatWrap").show();
+  }else{
+    $userError.html("That username is taken please try again")
+  }
+});
+return false;
 });
 socket.on("addedUser", function(){
   socket.emit( "join", location.pathname);
@@ -26,14 +39,35 @@ socket.on('usernames', function(data){
   console.log(data)
 
 })
-   $('form').submit(function(){
-     socket.emit('chat message', $('#m').val());
+
+const addChatMessage = (data) => {
+    var $usernameDiv = $('<span class="username"/>')
+      .text(data.username)
+    var $messageBodyDiv = $('<span class="messageBody">')
+      .text(data.message);
+
+
+    var $messageDiv = $('<li class="message"/>')
+      .data('username', data.username)
+      .append($usernameDiv, $messageBodyDiv);
+
+    addMessageElement($messageDiv);
+  }
+  const addMessageElement = (el) => {
+    var $el = $(el);
+      $messages.append($el);
+    $messages[0].scrollTop = $messages[0].scrollHeight;
+  }
+   $("#MessageInput").submit(function(){
+     socket.emit('Send Message', $('#m').val(), (data) =>{
+log(data)
+     });
      $('#m').val('');
      return false;
    });
-   socket.on('chat message', function(msg, username){
-          $('#messages').append('<b>'+username + ':</b> ' + msg + '<br>');
-          window.scrollTo(0, document.body.scrollHeight);
+   socket.on('chat message', function(data){
+          addChatMessage(data);
+          console.log(data)
         });
     socket.on('updateusers', function(users){
       $('#users').empty();
@@ -41,8 +75,24 @@ socket.on('usernames', function(data){
         $()
       })
     });
+    const log = (message) => {
+  var $el = $('<li>').addClass('log').text(message);
+  addMessageElement($el);
+}
+socket.on('user joined', (data) => {
+   log(data.username + ' joined');
+ });
+ socket.on('you joined', ()=>{
+   log("You have been connected, start chatting!");
+ });
+ socket.on('Private message', (data) =>{
+   addChatMessage(data);
+ });
+ socket.on('user left', (data) =>{
+   log(data.username + 'left the room');
+ })
 
-    var qrcode = new QRCode("qrcode");
+  /*  var qrcode = new QRCode("qrcode");
 document.getElementById('text').value = window.location;
 function makeCode () {
     var elText = document.getElementById("text");
@@ -66,5 +116,5 @@ $("#text").
         if (e.keyCode == 13) {
             makeCode();
         }
-    });
+    });*/
  });
