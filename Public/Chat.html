@@ -1,32 +1,69 @@
 <!doctype html>
 <html>
-  <head>
-        <meta charset="UTF-8" />
-    <title>Socket.IO chat</title>
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <link rel="stylesheet" href="ChatStyle.css">
+    <title>Conchat</title>
+      <link rel="stylesheet" href="Style.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-
-  </head>
-<body>
+</head>
+<body class="purple blue-grey lighten-5">
+  <nav>
+    <div class="nav-wrapper purple darken-4 ">
+      <a href="http://127.0.0.1:8000" class="brand-logo center">Conchat</a>
+       <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+       <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="http://127.0.0.1:8000"><i class="material-icons tooltipped"data-position="left" data-tooltip="Leave room">exit_to_app</i></a></li>
+        <li><a class= "pulse modal-trigger" href="#modal1"><i class="material-icons tooltipped" data-position="bottom" data-tooltip="Invite">person_add</i></a></li>
+      </ul>
+    </div>
+  </nav>
+  <ul class="sidenav" id="mobile-demo">
+    <li><a href="http://127.0.0.1:8000"><i class="material-icons">exit_to_app</i>Leave room</a></li>
+    <li><a class= "modal-trigger" href="#modal1"><i class="material-icons">person_add</i>Invite</a></li>
+   </ul>
   <div id="UserWrap">
-    <p id="UserError"></p>
+    <div class="container flow-text">
+    <p class="flow-text" id="UserError"></p>
     <form action="" id="Username">
-      <input id="Name"><button type="submit">Enter</button>
+      Enter a username
+      <input class="center-align" id="Name">
+      <div class="center-align">
+      <button class="center-align btn-large" type="submit">Enter</button>
+    </div>
     </form>
   </div>
+  </div>
+  <div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4 class="flow-text">Invite users using the code below</h4>
+    <div id ="QR">
+      <input id="QRtext" type="text" value="" style="width:80%" /><br/>
+    <div id="qrcode"></div>
+  </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
+</div>
   <div id="chatWrap">
+    <div id="messages" class="container-fluid">
   <ul class="messages"></ul>
-<form action="" id="MessageInput">
- <input id="m" placeholder="Type here..."/>
+</div>
+ <form action="" id="MessageInput">
+ <input id="m" class="browser-default"  required type="text" placeholder="Type here..."/>
+ <button class="btn waves-effect waves-light" id="formbutton" type="submit" name="action">
+     <i class="material-icons right">send</i>
+   </button>
 </form>
 </div>
-  <script src="socket.io/socket.io.js"></script>
-  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="/client.js"></script>
+  <script src="socket.io/socket.io.js"></script>
   <script src ="/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
 </body>
 </html>
