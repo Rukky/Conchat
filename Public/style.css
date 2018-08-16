@@ -47,3 +47,15 @@ border: 0;
 .pm{
   font-style: italic;
 }
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1 0 auto;
+  }
+.create{
+  padding: 200px
+}

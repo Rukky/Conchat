@@ -1,10 +1,8 @@
   $(function(){
-  var socket = io({
-     'reconnection': true,
-     'reconnectionDelay': 1000,
-     'reconnectionDelayMax' : 5000,
-     'reconnectionAttempts': 5
- });
+  var socket = io(
+     'ws://localhost:8000', {transports: ['websocket']}
+     //for mac
+ );
  var $userError = $('#UserError');
  var $messages = $('.messages');
  var $m = $('#m').val(); // Messages area
