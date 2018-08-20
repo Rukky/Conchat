@@ -8,23 +8,25 @@
       <link rel="stylesheet" href="Style.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/css/materialize.min.css">
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-</head>
+<header>
 <body class="purple blue-grey lighten-5">
   <nav>
     <div class="nav-wrapper purple darken-4 ">
       <a href="http://127.0.0.1:8000" class="brand-logo center">Conchat</a>
-       <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+       <a href="" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
        <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li><a href="http://127.0.0.1:8000"><i class="material-icons tooltipped"data-position="left" data-tooltip="Leave room">exit_to_app</i></a></li>
-        <li><a class= "pulse modal-trigger" href="#modal1"><i class="material-icons tooltipped" data-position="bottom" data-tooltip="Invite">person_add</i></a></li>
+        <li><a class= "modal-trigger" href="#modal1"><i class="material-icons tooltipped" data-position="bottom" data-tooltip="Invite">person_add</i></a></li>
       </ul>
     </div>
   </nav>
+
   <ul class="sidenav" id="mobile-demo">
     <li><a href="http://127.0.0.1:8000"><i class="material-icons">exit_to_app</i>Leave room</a></li>
     <li><a class= "modal-trigger" href="#modal1"><i class="material-icons">person_add</i>Invite</a></li>
    </ul>
+ </header>
+ <main>
   <div id="UserWrap">
     <div class="container flow-text">
     <p class="flow-text" id="UserError"></p>
@@ -45,9 +47,6 @@
     <div id="qrcode"></div>
   </div>
   </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
-  </div>
 </div>
   <div id="chatWrap">
     <div id="messages" class="container-fluid">
@@ -60,10 +59,21 @@
    </button>
 </form>
 </div>
+</main>
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script src="/client.js"></script>
   <script src="socket.io/socket.io.js"></script>
   <script src ="/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-rc.2/js/materialize.min.js"></script>
 </body>
+<footer class="page-footer purple darken-4">
+      <div class="footer-copyright">
+        <div class="container">
+        © 2018 Final project for 17002745
+        <a class="grey-text text-lighten-4 right" href="#!"><i class="material-icons">mail</i></a>
+        <a class="grey-text text-lighten-4 right" href="#!"><i class="material-icons">local_library</i></a>
+        <a class="grey-text text-lighten-4 right" href="#!"><i class="material-icons">rss_feed</i></a>
+        </div>
+      </div>
+    </footer>
 </html>

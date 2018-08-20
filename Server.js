@@ -1,11 +1,10 @@
-//Keep alive ping?
-//display users in chat room
-//chat store?
-
+//Require the node cluster modules
 var cluster = require('cluster')
+//Cluster workers based on the number of cores on the CPU
 const numCPUs = require('os').cpus().length;
 
-
+//If the cluster is the master worker, log it on the console and create a server
+//that distributes incoming socket connections between the workers
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
@@ -21,11 +20,13 @@ if (cluster.isMaster) {
 for (let i = 0; i < numCPUs; i++) {
   cluster.fork();
  }
+ //If a woker dies, log it to the console
   cluster.on('exit', (worker, code, signal) => {
     console.log(`worker ${worker.process.pid} died`);
   });
+  //After forking workers in the master process create a server that listens on a port
   } else {
-
+//Require our dependencies
     var express = require('express');
       var app = express();
 
@@ -39,6 +40,7 @@ for (let i = 0; i < numCPUs; i++) {
 
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
+//Settings for monitoring spam activity from the Socket Anti Spam module
        const socketAntiSpam = new SocketAntiSpam({
          banTime:            10,         // Ban time in minutes
          kickThreshold:      15,          // User gets kicked after this many spam score
@@ -52,20 +54,27 @@ for (let i = 0; i < numCPUs; i++) {
 
 
        // routing
+       //User the public folder to serve static pages
        app.use(express.static('public'));
 
+//Server the homepage when visiting localhost:8000
        app.get('/', function (req, res) {
          res.sendFile(__dirname + '/Public/Index.html');
        });
 
+//When a string is entered after our homepage, server the chatroom page
        app.get(/(^\/[a-zA-Z0-9\-]+$)/, function (req, res){
          res.sendFile(__dirname + '/Public/Chat.html');
        });
 
        var users = {};
 
+//This function runs when a socket connects
        io.on('connection', function(socket){
 
+//The server receives an addUser event, checks if the data received is
+//a unique username. If it is it adds it to out array of existing usernames and
+// authenticates with the anti spam module and emits an event to the client
              socket.on('addUser', function (data, callback) {
              if (data in users){
                callback(false);
@@ -75,12 +84,11 @@ for (let i = 0; i < numCPUs; i++) {
               users[socket.username] = socket;
               socket.emit('addedUser');
               socketAntiSpam.authenticate(socket);
-              updateUsers();
             }
                 });
-             function updateUsers(){
-               io.sockets.in(socket.room).emit('usernames', Object.keys(users) );
-              }
+
+                //when the client emits the join even it tells them and other users
+                //that a user joined
               socket.on('join', function(room){
                  socket.join(room);
                  socket.room= room;
@@ -91,6 +99,8 @@ for (let i = 0; i < numCPUs; i++) {
                     users[clients] =socket;
                });
              });
+
+             //This even checks if a message is private or not
               socket.on('Send Message', function (data, callback) {
                redisClient.lpush('messages', JSON.stringify(data)); // push into redis
                redisClient.lrange('messages', 0, 99, function(err, reply) {
@@ -128,6 +138,8 @@ for (let i = 0; i < numCPUs; i++) {
                    }
              });
 
+//when a socket disconnects, remove the username from our username array and tell
+//users in the room that someone has disconnected.
               socket.on('disconnect', function () {
                //May be do some authorization
                socket.broadcast.to(socket.room).emit('user left', {
@@ -138,18 +150,21 @@ for (let i = 0; i < numCPUs; i++) {
                console.log(socket.id, "left", socket.room);
            });
 
-           socketAntiSpam.event.on('authenticate', socket => {
-             })
+//When a user sends too many messages and gets kicked inform them
            socketAntiSpam.event.on('kick', (socket, data) => {
            socket.emit('User Kicked');
            console.log(cluster.worker.id);
          });
+         //when a user gets banned inform them
            socketAntiSpam.event.on('ban', (socket, data) => {
            socket.emit('User Banned');
             })
 
        });
+
+       //listen on this port
       server.listen(8000);
       console.log("Listening")
+      //log our workers and their IDs to check if they have started
       console.log(`Worker ${process.pid} started`);
     }
