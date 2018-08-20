@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 //Require the node cluster modules
-=======
-
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
 var cluster = require('cluster')
 //Cluster workers based on the number of cores on the CPU
 const numCPUs = require('os').cpus().length;
@@ -90,13 +86,9 @@ for (let i = 0; i < numCPUs; i++) {
               socketAntiSpam.authenticate(socket);
             }
                 });
-<<<<<<< HEAD
 
                 //when the client emits the join even it tells them and other users
                 //that a user joined
-=======
-            
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
               socket.on('join', function(room){
                  socket.join(room);
                  socket.room= room;

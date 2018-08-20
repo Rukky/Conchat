@@ -38,11 +38,7 @@ socket.on("addedUser", function(){
   socket.emit( "join", location.pathname);
 });
 
-<<<<<<< HEAD
 //When the user send a message, emit the send message event to the server
-=======
-
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
  $("#MessageInput").submit(function(){
    socket.emit('Send Message', $('#m').val(), function(data){
     log(data)
@@ -56,7 +52,6 @@ socket.on("addedUser", function(){
           addChatMessage(data);
         });
 
-<<<<<<< HEAD
 //When the server emits a user has joined, tell the other users
 socket.on('user joined', (data) => {
    log(data.username + ' joined!');
@@ -64,19 +59,10 @@ socket.on('user joined', (data) => {
 
 //when the server emits that you have joined tell the user
  socket.on('you joined', ()=>{
-=======
-socket.on('user joined', function(data) {
-   log(data.username + ' joined!');
- });
-
-
- socket.on('you joined', function(){
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
    log("You have been connected, start chatting!");
    log("You can whisper another user using /w")
  });
 
-<<<<<<< HEAD
 //The server determined that this is a private message so send it to the
 //appropriate user
  socket.on('Private message', (data) =>{
@@ -100,27 +86,6 @@ socket.on('user joined', function(data) {
 
 //This function appends the username and message to the message div in the chat room
  const addChatMessage = (data) => {
-=======
-
- socket.on('Private message', function(data){
-   addPrivateMessage(data);
- });
-
-
- socket.on('user left', function(data) {
-   log(data.username + 'left the room');
- });
-
- socket.on('User Kicked',function(data){
-   log("You have been kicked for spamming! You may reconnect, but leave the spam behind!")
- });
-
- socket.on('User Banned', function(data){
-   log("You have been temporarily banned for spamming, you may reconnect after 10 minutes")
- });
-
- const addChatMessage = (function(data){
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
        var $usernameDiv = $('<span class="username flow-text"/>')
          .text(data.username)
        var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -132,13 +97,9 @@ socket.on('user joined', function(data) {
         addMessageElement($messageDiv);
      });
 
-<<<<<<< HEAD
 //This function appends a private message to the message div in the chat rooms
 //It is stylised and can only be seen by the intended user
   const addPrivateMessage = (data) => {
-=======
-  const addPrivateMessage =(function(data)  {
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
          var $usernameDiv = $('<span class="username flow-text"/>')
            .text(data.username)
          var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -148,7 +109,6 @@ socket.on('user joined', function(data) {
            .append($usernameDiv, $messageBodyDiv);
 
          addMessageElement($messageDiv);
-<<<<<<< HEAD
        }
 
        //This appends messages to the the message div  in the chatroom and scrolls
@@ -161,17 +121,6 @@ socket.on('user joined', function(data) {
 
      //This appends messages from the server to the chatroom
    const log = (message) => {
-=======
-       });
-
-   const addMessageElement =(function (el)  {
-       var $el = $(el);
-         $messages.append($el);
-       $messages[0].scrollTop = $messages[0].scrollHeight;
-     });
-
-   const log = (function (message) {
->>>>>>> aba79ff03b6938921f4629b10b8476e9503f67cf
     var $el = $('<li>').addClass('log center-align flow-text').text(message);
 
     addMessageElement($el);
