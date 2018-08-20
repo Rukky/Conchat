@@ -12,6 +12,7 @@
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
+    "chai": "^4.1.2",
     "coffeescript": "^2.3.1",
     "express": "^4.16.3",
     "express.io": "^1.1.13",
