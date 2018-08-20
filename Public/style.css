@@ -47,6 +47,14 @@ border: 0;
 .pm{
   font-style: italic;
 }
+@media screen\0 {
+  footer{
+    position: fixed;
+    bottom:0;
+    width:100%;
+  }
+}
+
 body {
     display: flex;
     min-height: 100vh;
@@ -57,5 +65,5 @@ body {
     flex: 1 0 auto;
   }
 .create{
-  padding: 200px
+  padding: 10%
 }

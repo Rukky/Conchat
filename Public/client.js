@@ -12,7 +12,7 @@ document.getElementById('Name').value = "Guest" +id ;
 
 $('#Username').submit(function(e){
   e.preventDefault();
-  socket.emit("addUser", $("#Name").val(),  function(data){
+  socket.emit("addUser", $("#Name").val(), function(data){
   if(data){
     $("#UserWrap").hide();
     $("#chatWrap").show();
@@ -28,17 +28,9 @@ socket.on("addedUser", function(){
   socket.emit( "join", location.pathname);
 });
 
-socket.on('usernames', function(data){
-    var html ='';
-  for(i=0; i<data.length; i++){
-    html += data[i] + '<br/>'
-    $('#users').html(html);
-  }
-  console.log(data)
 
-})
  $("#MessageInput").submit(function(){
-   socket.emit('Send Message', $('#m').val(), (data) =>{
+   socket.emit('Send Message', $('#m').val(), function(data){
     log(data)
      });
      $('#m').val('');
@@ -49,43 +41,35 @@ socket.on('usernames', function(data){
           addChatMessage(data);
         });
 
-  socket.on('updateusers', function(users){
-      $('#users').empty();
-      $.each(users, function(key,value){
-        $()
-      })
-    });
-
-
-socket.on('user joined', (data) => {
+socket.on('user joined', function(data) {
    log(data.username + ' joined!');
  });
 
 
- socket.on('you joined', ()=>{
+ socket.on('you joined', function(){
    log("You have been connected, start chatting!");
    log("You can whisper another user using /w")
  });
 
 
- socket.on('Private message', (data) =>{
+ socket.on('Private message', function(data){
    addPrivateMessage(data);
  });
 
 
- socket.on('user left', (data) =>{
+ socket.on('user left', function(data) {
    log(data.username + 'left the room');
  });
 
- socket.on('User Kicked',(data)=>{
+ socket.on('User Kicked',function(data){
    log("You have been kicked for spamming! You may reconnect, but leave the spam behind!")
  });
 
- socket.on('User Banned', (data)=>{
+ socket.on('User Banned', function(data){
    log("You have been temporarily banned for spamming, you may reconnect after 10 minutes")
  });
 
- const addChatMessage = (data) => {
+ const addChatMessage = (function(data){
        var $usernameDiv = $('<span class="username flow-text"/>')
          .text(data.username)
        var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -95,9 +79,9 @@ socket.on('user joined', (data) => {
          .append($usernameDiv, $messageBodyDiv);
 
         addMessageElement($messageDiv);
-     };
+     });
 
-  const addPrivateMessage = (data) => {
+  const addPrivateMessage =(function(data)  {
          var $usernameDiv = $('<span class="username flow-text"/>')
            .text(data.username)
          var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -107,17 +91,19 @@ socket.on('user joined', (data) => {
            .append($usernameDiv, $messageBodyDiv);
 
          addMessageElement($messageDiv);
-       }
-   const addMessageElement = (el) => {
+       });
+
+   const addMessageElement =(function (el)  {
        var $el = $(el);
          $messages.append($el);
        $messages[0].scrollTop = $messages[0].scrollHeight;
-     }
-   const log = (message) => {
+     });
+
+   const log = (function (message) {
     var $el = $('<li>').addClass('log center-align flow-text').text(message);
 
     addMessageElement($el);
-}
+});
 
   var qrcode = new QRCode("qrcode");
   document.getElementById('QRtext').value = window.location;

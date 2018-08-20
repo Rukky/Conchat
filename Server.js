@@ -1,6 +1,3 @@
-//Keep alive ping?
-//display users in chat room
-//chat store?
 
 var cluster = require('cluster')
 const numCPUs = require('os').cpus().length;
@@ -75,12 +72,9 @@ for (let i = 0; i < numCPUs; i++) {
               users[socket.username] = socket;
               socket.emit('addedUser');
               socketAntiSpam.authenticate(socket);
-              updateUsers();
             }
                 });
-             function updateUsers(){
-               io.sockets.in(socket.room).emit('usernames', Object.keys(users) );
-              }
+            
               socket.on('join', function(room){
                  socket.join(room);
                  socket.room= room;
