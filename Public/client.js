@@ -58,34 +58,34 @@ socket.on('user joined', (data) => {
  });
 
 //when the server emits that you have joined tell the user
- socket.on('you joined', ()=>{
+ socket.on('you joined', function() {
    log("You have been connected, start chatting!");
    log("You can whisper another user using /w")
  });
 
 //The server determined that this is a private message so send it to the
 //appropriate user
- socket.on('Private message', (data) =>{
+ socket.on('Private message', function(data){
    addPrivateMessage(data);
  });
 
 //Tells users that a user has left
- socket.on('user left', (data) =>{
+ socket.on('user left', function(data){
    log(data.username + ' left the room');
  });
 
 //Show this message when a user is kicked
- socket.on('User Kicked',(data)=>{
+ socket.on('User Kicked',function(data){
    log("You have been kicked for spamming! You may reconnect, but leave the spam behind!")
  });
 
 //Show this message when a user is banned
- socket.on('User Banned', (data)=>{
+ socket.on('User Banned', function(data){
    log("You have been temporarily banned for spamming, you may reconnect after 10 minutes")
  });
 
 //This function appends the username and message to the message div in the chat room
- const addChatMessage = (data) => {
+ const addChatMessage = function(data) {
        var $usernameDiv = $('<span class="username flow-text"/>')
          .text(data.username)
        var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -95,11 +95,11 @@ socket.on('user joined', (data) => {
          .append($usernameDiv, $messageBodyDiv);
 
         addMessageElement($messageDiv);
-     });
+     };
 
 //This function appends a private message to the message div in the chat rooms
 //It is stylised and can only be seen by the intended user
-  const addPrivateMessage = (data) => {
+  const addPrivateMessage = function (data) {
          var $usernameDiv = $('<span class="username flow-text"/>')
            .text(data.username)
          var $messageBodyDiv = $('<span class="messageBody flow-text">')
@@ -113,18 +113,18 @@ socket.on('user joined', (data) => {
 
        //This appends messages to the the message div  in the chatroom and scrolls
        //when a new message is received
-   const addMessageElement = (el) => {
+   const addMessageElement = function (el) {
        var $el = $(el);
          $messages.append($el);
        $messages[0].scrollTop = $messages[0].scrollHeight;
      }
 
      //This appends messages from the server to the chatroom
-   const log = (message) => {
+   const log = function(message){
     var $el = $('<li>').addClass('log center-align flow-text').text(message);
 
     addMessageElement($el);
-});
+};
 
 //This creates our QR code using the value of the URL
   var qrcode = new QRCode("qrcode");

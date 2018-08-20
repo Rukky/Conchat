@@ -102,6 +102,10 @@ for (let i = 0; i < numCPUs; i++) {
 
              //This even checks if a message is private or not
               socket.on('Send Message', function (data, callback) {
+                var username = socket.username;
+                var room = socket.room
+                var message = data
+                console.log(room, username)
                redisClient.lpush('messages', JSON.stringify(data)); // push into redis
                redisClient.lrange('messages', 0, 99, function(err, reply) {
                });
