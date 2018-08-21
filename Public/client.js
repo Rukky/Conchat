@@ -51,6 +51,11 @@ socket.on("addedUser", function(){
   socket.on('chat message', function(data){
           addChatMessage(data);
         });
+        socket.on('store', function(data){
+          var data = JSON.parse(data)
+          addChatMessage(data)
+          console.log(data)
+        })
 
 //When the server emits a user has joined, tell the other users
 socket.on('user joined', (data) => {

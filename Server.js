@@ -91,7 +91,7 @@ for (let i = 0; i < numCPUs; i++) {
                 //that a user joined
               socket.on('join', function(room){
                  socket.join(room);
-                 socket.room= room;
+                 socket.room = room;
                  socket.emit('you joined')
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
@@ -105,11 +105,12 @@ for (let i = 0; i < numCPUs; i++) {
                 var username = socket.username;
                 var room = socket.room
                 var message = data
-                console.log(room, username)
-               redisClient.lpush('messages', JSON.stringify(data)); // push into redis
+                var msgdata = [ username, room, message]
+               redisClient.lpush('messages', JSON.stringify(msgdata)); // push into redis
                redisClient.lrange('messages', 0, 99, function(err, reply) {
+                 io.in(msgdata.room).emit('store', reply);
+                 console.log(reply)
                });
-               console.log(data)
                var msg = data.trim();
                if(msg.substr(0,3) === '/w '){
                 msg = msg.substr(3);
