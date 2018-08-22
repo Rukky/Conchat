@@ -20,6 +20,7 @@
     "ioredis": "^3.2.2",
     "jsdoc": "^3.5.5",
     "materialize-social": "^1.0.3",
+    "mongoose": "^5.2.8",
     "redis": "^2.8.0",
     "redis-hashes": "^0.6.1",
     "socket-anti-spam": "^2.0.0",

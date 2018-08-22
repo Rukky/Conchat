@@ -51,11 +51,6 @@ socket.on("addedUser", function(){
   socket.on('chat message', function(data){
           addChatMessage(data);
         });
-        socket.on('store', function(data){
-          var data = JSON.parse(data)
-          addChatMessage(data)
-          console.log(data)
-        })
 
 //When the server emits a user has joined, tell the other users
 socket.on('user joined', (data) => {
@@ -66,6 +61,13 @@ socket.on('user joined', (data) => {
  socket.on('you joined', function() {
    log("You have been connected, start chatting!");
    log("You can whisper another user using /w")
+ });
+
+ socket.on('Load Stored Messages', function(data){
+    for(var i=data.length-1; i >= 0; i--){
+      addChatMessage(data[i]);
+      console.log(data)
+    }
  });
 
 //The server determined that this is a private message so send it to the

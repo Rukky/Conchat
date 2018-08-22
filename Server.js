@@ -35,9 +35,24 @@ for (let i = 0; i < numCPUs; i++) {
        var io = require('socket.io').listen(server);
        var Socketredis = require('socket.io-redis');
        var SocketAntiSpam  = require('socket-anti-spam');
-       var redis = require('redis');
-       var redisClient = redis.createClient({ "host": "127.0.0.1", "port": 6379 });
+           mongoose = require('mongoose'),
 
+           mongoose.connect('mongodb://localhost:27017/Conchat',{useNewUrlParser: true}, function(err){
+             if (err){
+               consolelog(err);
+             }else {
+               console.log('connected to mongodb')
+             }
+           });
+
+          var chatSchema = mongoose.Schema({
+            Time : {type: Date, default: Date.now},
+            username : String,
+            message: String,
+            Room: String,
+          });
+          
+          var Chat = mongoose.model('Message', chatSchema);
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
 //Settings for monitoring spam activity from the Socket Anti Spam module
@@ -47,12 +62,8 @@ for (let i = 0; i < numCPUs; i++) {
          kickTimesBeforeBan: 3,          // User gets banned after this many kicks
          banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
          io:                 io,  // Bind the socket.io variable
-})
-
-
-       var rooms = [];
-
-
+});
+      
        // routing
        //User the public folder to serve static pages
        app.use(express.static('public'));
@@ -71,7 +82,7 @@ for (let i = 0; i < numCPUs; i++) {
 
 //This function runs when a socket connects
        io.on('connection', function(socket){
-
+         
 //The server receives an addUser event, checks if the data received is
 //a unique username. If it is it adds it to out array of existing usernames and
 // authenticates with the anti spam module and emits an event to the client
@@ -95,22 +106,20 @@ for (let i = 0; i < numCPUs; i++) {
                  socket.emit('you joined')
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
-                 io.in(socket.room).clients((err, clients) => {
-                    users[clients] =socket;
-               });
+                   var query = Chat.find({Room:room});
+                   query.sort({Time:-1}).limit(4).exec(function(err, docs){
+                    if(err) throw err;
+                    console.log('sending stored messages')
+                    socket.emit('Load Stored Messages', docs);
+                  });
+
+                 //io.in(socket.room).clients((err, clients) => {
+                   // users[clients] =socket;
+               //});
              });
 
              //This even checks if a message is private or not
               socket.on('Send Message', function (data, callback) {
-                var username = socket.username;
-                var room = socket.room
-                var message = data
-                var msgdata = [ username, room, message]
-               redisClient.lpush('messages', JSON.stringify(msgdata)); // push into redis
-               redisClient.lrange('messages', 0, 99, function(err, reply) {
-                 io.in(msgdata.room).emit('store', reply);
-                 console.log(reply)
-               });
                var msg = data.trim();
                if(msg.substr(0,3) === '/w '){
                 msg = msg.substr(3);
@@ -137,9 +146,17 @@ for (let i = 0; i < numCPUs; i++) {
                    callback('Please enter a message')
                  }
               }else {
+                var newMessage = new Chat({
+                  message:msg,
+                  username: socket.username,
+                  Room: socket.room,
+                });
+                newMessage.save(function(err){
+                  if(err) throw err;
                 io.sockets.in(socket.room).emit("chat message", {
                    username: socket.username,
                      message: msg});
+                    })
                    }
              });
 
@@ -149,7 +166,7 @@ for (let i = 0; i < numCPUs; i++) {
                //May be do some authorization
                socket.broadcast.to(socket.room).emit('user left', {
                  username:socket.username
-               });
+               })
                delete users[socket.username];
                socket.leave(socket.room);
                console.log(socket.id, "left", socket.room);
@@ -163,7 +180,7 @@ for (let i = 0; i < numCPUs; i++) {
          //when a user gets banned inform them
            socketAntiSpam.event.on('ban', (socket, data) => {
            socket.emit('User Banned');
-            })
+            });
 
        });
 
