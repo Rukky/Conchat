@@ -107,7 +107,7 @@ for (let i = 0; i < numCPUs; i++) {
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
                    var query = Chat.find({Room:room});
-                   query.sort({Time:-1}).limit(4).exec(function(err, docs){
+                   query.sort({Time:-1}).limit(100).exec(function(err, docs){
                     if(err) throw err;
                     console.log('sending stored messages')
                     socket.emit('Load Stored Messages', docs);
