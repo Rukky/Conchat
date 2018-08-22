@@ -51,7 +51,7 @@ for (let i = 0; i < numCPUs; i++) {
             message: String,
             Room: String,
           });
-          
+
           var Chat = mongoose.model('Message', chatSchema);
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
@@ -63,7 +63,7 @@ for (let i = 0; i < numCPUs; i++) {
          banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
          io:                 io,  // Bind the socket.io variable
 });
-      
+
        // routing
        //User the public folder to serve static pages
        app.use(express.static('public'));
@@ -82,7 +82,7 @@ for (let i = 0; i < numCPUs; i++) {
 
 //This function runs when a socket connects
        io.on('connection', function(socket){
-         
+
 //The server receives an addUser event, checks if the data received is
 //a unique username. If it is it adds it to out array of existing usernames and
 // authenticates with the anti spam module and emits an event to the client
@@ -185,7 +185,7 @@ for (let i = 0; i < numCPUs; i++) {
        });
 
        //listen on this port
-      server.listen(8000);
+      server.listen(8000, '0.0.0.0');
       console.log("Listening")
       //log our workers and their IDs to check if they have started
       console.log(`Worker ${process.pid} started`);

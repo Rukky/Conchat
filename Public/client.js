@@ -2,7 +2,7 @@
   $(function(){
     //connect to our socket, this seems to not be needed on windows
   var socket = io(
-     'ws://localhost:8000', {transports: ['websocket']}
+     'ws://rukkys-mac:8000', {transports: ['websocket']}
  );
 
  //Our variable declarations for HTML elements
