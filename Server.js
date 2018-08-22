@@ -1,5 +1,5 @@
 //Require the node cluster modules
-var cluster = require('cluster')
+var cluster = require('cluster');
 //Cluster workers based on the number of cores on the CPU
 const numCPUs = require('os').cpus().length;
 
@@ -7,8 +7,10 @@ const numCPUs = require('os').cpus().length;
 //that distributes incoming socket connections between the workers
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
-
-  var server = require('http').createServer();
+  
+  var http = require('http');
+  var server = http.createServer();
+  var sticky = require('sticky-session');
   var io = require('socket.io').listen(server);
   var Socketredis = require('socket.io-redis');
   io.adapter(Socketredis({ host: 'localhost', port: 6379 }));
@@ -27,6 +29,7 @@ for (let i = 0; i < numCPUs; i++) {
   //After forking workers in the master process create a server that listens on a port
   } else {
 //Require our dependencies
+
     var express = require('express');
       var app = express();
 
@@ -51,7 +54,13 @@ for (let i = 0; i < numCPUs; i++) {
             message: String,
             Room: String,
           });
+
+          var userSchema = mongoose.Schema({
+            username: String,
+            Room: String,
+          })
           
+          var  Users = mongoose.model('User', userSchema);
           var Chat = mongoose.model('Message', chatSchema);
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
@@ -79,31 +88,24 @@ for (let i = 0; i < numCPUs; i++) {
        });
 
        var users = {};
+      
 
 //This function runs when a socket connects
        io.on('connection', function(socket){
+        io.set('transports', ['websocket']);
          
 //The server receives an addUser event, checks if the data received is
 //a unique username. If it is it adds it to out array of existing usernames and
 // authenticates with the anti spam module and emits an event to the client
              socket.on('addUser', function (data, callback) {
+               var room = socket.room
              if (data in users){
                callback(false);
              } else {
                callback(true);
               socket.username = data;
               users[socket.username] = socket;
-              socket.emit('addedUser');
-              socketAntiSpam.authenticate(socket);
-            }
-                });
-
-                //when the client emits the join even it tells them and other users
-                //that a user joined
-              socket.on('join', function(room){
-                 socket.join(room);
-                 socket.room = room;
-                 socket.emit('you joined')
+               socket.emit('you joined')
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
                    var query = Chat.find({Room:room});
@@ -112,10 +114,27 @@ for (let i = 0; i < numCPUs; i++) {
                     console.log('sending stored messages')
                     socket.emit('Load Stored Messages', docs);
                   });
+              socketAntiSpam.authenticate(socket);
+            }
+                });
 
-                 //io.in(socket.room).clients((err, clients) => {
-                   // users[clients] =socket;
-               //});
+                socket.on('returnUser', function (data, callback){
+                  if(data in users){
+                    callback(false);
+                  }else{
+                    callback(true);
+                    socket.username = data;
+                    users[socket.username] = socket;
+                    socket.broadcast.to(socket.room).emit('user reconnected',{
+                  username: socket.username});
+                  }
+                })
+
+                //when the client emits the join even it tells them and other users
+                //that a user joined
+              socket.on('join', function(room){
+                 socket.join(room);
+                 socket.room = room;
              });
 
              //This even checks if a message is private or not

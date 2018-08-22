@@ -2,9 +2,11 @@
   $(function(){
     //connect to our socket, this seems to not be needed on windows
   var socket = io(
-     'ws://localhost:8000', {transports: ['websocket']}
+     'ws://rukky-desktop:8000', {transports: ['websocket']}
  );
-
+ socket.on('connect', function(){
+  socket.emit( "join", location.pathname);
+ })
  //Our variable declarations for HTML elements
  var $userError = $('#UserError');
  var $messages = $('.messages');
@@ -21,6 +23,7 @@ document.getElementById('Name').value = "Guest" +id ;
 $('#Username').submit(function(e){
   e.preventDefault();
   socket.emit("addUser", $("#Name").val(), function(data){
+    console.log('emmitting username')
   if(data){
     $("#UserWrap").hide();
     $("#chatWrap").show();
@@ -30,12 +33,6 @@ $('#Username').submit(function(e){
   }
 });
 return false;
-});
-
-//When the server emits this event, send back the join event and the pathname of
-//our url as a room
-socket.on("addedUser", function(){
-  socket.emit( "join", location.pathname);
 });
 
 //When the user send a message, emit the send message event to the server
@@ -89,6 +86,17 @@ socket.on('user joined', (data) => {
 //Show this message when a user is banned
  socket.on('User Banned', function(data){
    log("You have been temporarily banned for spamming, you may reconnect after 10 minutes")
+ });
+
+ socket.on('reconnect', function(){
+   socket.emit("returnUser", $("#Name").val(), function(data){
+    console.log('emmitting username')
+  if(data){
+    log("You have reconnected")
+}else{
+   socket.emit('disconnect')
+}
+})
  });
 
 //This function appends the username and message to the message div in the chat room
