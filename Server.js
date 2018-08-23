@@ -10,7 +10,6 @@ if (cluster.isMaster) {
 
   var http = require('http');
   var server = http.createServer();
-  var sticky = require('sticky-session');
   var io = require('socket.io').listen(server);
   var Socketredis = require('socket.io-redis');
   io.adapter(Socketredis({ host: 'localhost', port: 6379 }));
@@ -105,7 +104,6 @@ for (let i = 0; i < numCPUs; i++) {
                    var query = Chat.find({Room:room});
                    query.sort({Time:-1}).limit(100).exec(function(err, docs){
                     if(err) throw err;
-                    console.log('sending stored messages')
                     socket.emit('Load Stored Messages', docs);
                   });
               socketAntiSpam.authenticate(socket);
@@ -119,8 +117,6 @@ for (let i = 0; i < numCPUs; i++) {
                     callback(true);
                     socket.username = data;
                     users[socket.username] = socket;
-                    socket.broadcast.to(socket.room).emit('user reconnected',{
-                  username: socket.username});
                   }
                 })
 
