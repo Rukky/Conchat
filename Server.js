@@ -38,11 +38,11 @@ for (let i = 0; i < numCPUs; i++) {
        var io = require('socket.io').listen(server);
        var Socketredis = require('socket.io-redis');
        var SocketAntiSpam  = require('socket-anti-spam');
-           mongoose = require('mongoose'),
+        mongoose = require('mongoose'),
 
            mongoose.connect('mongodb://localhost:27017/Conchat',{useNewUrlParser: true}, function(err){
              if (err){
-               consolelog(err);
+               console.log(err);
              }else {
                console.log('connected to mongodb')
              }
@@ -54,14 +54,9 @@ for (let i = 0; i < numCPUs; i++) {
             message: String,
             Room: String,
           });
-
-          var userSchema = mongoose.Schema({
-            username: String,
-            Room: String,
-          })
-          
-          var  Users = mongoose.model('User', userSchema);
           var Chat = mongoose.model('Message', chatSchema);
+
+
        io.adapter(Socketredis({ host: 'localhost', port: 6379}));
 
 //Settings for monitoring spam activity from the Socket Anti Spam module
@@ -99,23 +94,23 @@ for (let i = 0; i < numCPUs; i++) {
 // authenticates with the anti spam module and emits an event to the client
              socket.on('addUser', function (data, callback) {
                var room = socket.room
+               Users.findOne
              if (data in users){
                callback(false);
              } else {
                callback(true);
               socket.username = data;
               users[socket.username] = socket;
-               socket.emit('you joined')
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
-                   var query = Chat.find({Room:room});
-                   query.sort({Time:-1}).limit(100).exec(function(err, docs){
-                    if(err) throw err;
-                    console.log('sending stored messages')
-                    socket.emit('Load Stored Messages', docs);
-                  });
               socketAntiSpam.authenticate(socket);
             }
+            var query = Chat.find({Room:room});
+            query.sort({Time:-1}).limit(100).exec(function(err, docs){
+             if(err) throw err;
+             console.log('sending stored messages')
+             socket.emit('Load Stored Messages', docs);
+           });
                 });
 
                 socket.on('returnUser', function (data, callback){
@@ -125,8 +120,6 @@ for (let i = 0; i < numCPUs; i++) {
                     callback(true);
                     socket.username = data;
                     users[socket.username] = socket;
-                    socket.broadcast.to(socket.room).emit('user reconnected',{
-                  username: socket.username});
                   }
                 })
 
@@ -135,6 +128,7 @@ for (let i = 0; i < numCPUs; i++) {
               socket.on('join', function(room){
                  socket.join(room);
                  socket.room = room;
+                 socket.emit('you joined')
              });
 
              //This even checks if a message is private or not
