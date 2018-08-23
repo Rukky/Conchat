@@ -2,7 +2,7 @@
   $(function(){
     //connect to our socket, this seems to not be needed on windows
   var socket = io(
-     'ws://rukky-desktop:8000', {transports: ['websocket']}
+     'ws://rukkys-mac:8000', {transports: ['websocket']}
  );
  socket.on('connect', function(){
   socket.emit( "join", location.pathname);

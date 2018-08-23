@@ -7,10 +7,9 @@ const numCPUs = require('os').cpus().length;
 //that distributes incoming socket connections between the workers
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
-  
+
   var http = require('http');
   var server = http.createServer();
-  var sticky = require('sticky-session');
   var io = require('socket.io').listen(server);
   var Socketredis = require('socket.io-redis');
   io.adapter(Socketredis({ host: 'localhost', port: 6379 }));
@@ -54,6 +53,10 @@ for (let i = 0; i < numCPUs; i++) {
             message: String,
             Room: String,
           });
+<<<<<<< HEAD
+=======
+
+>>>>>>> 15a1ce307d9cabf4fdb1ac27ae0613a1ce127390
           var Chat = mongoose.model('Message', chatSchema);
 
 
@@ -67,7 +70,7 @@ for (let i = 0; i < numCPUs; i++) {
          banning:            true,       // Uses temp IP banning after kickTimesBeforeBan
          io:                 io,  // Bind the socket.io variable
 });
-      
+
        // routing
        //User the public folder to serve static pages
        app.use(express.static('public'));
@@ -83,12 +86,12 @@ for (let i = 0; i < numCPUs; i++) {
        });
 
        var users = {};
-      
+
 
 //This function runs when a socket connects
        io.on('connection', function(socket){
         io.set('transports', ['websocket']);
-         
+
 //The server receives an addUser event, checks if the data received is
 //a unique username. If it is it adds it to out array of existing usernames and
 // authenticates with the anti spam module and emits an event to the client
@@ -103,6 +106,14 @@ for (let i = 0; i < numCPUs; i++) {
               users[socket.username] = socket;
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
+<<<<<<< HEAD
+=======
+                   var query = Chat.find({Room:room});
+                   query.sort({Time:-1}).limit(100).exec(function(err, docs){
+                    if(err) throw err;
+                    socket.emit('Load Stored Messages', docs);
+                  });
+>>>>>>> 15a1ce307d9cabf4fdb1ac27ae0613a1ce127390
               socketAntiSpam.authenticate(socket);
             }
             var query = Chat.find({Room:room});
@@ -198,7 +209,7 @@ for (let i = 0; i < numCPUs; i++) {
        });
 
        //listen on this port
-      server.listen(8000);
+      server.listen(8000, '0.0.0.0');
       console.log("Listening")
       //log our workers and their IDs to check if they have started
       console.log(`Worker ${process.pid} started`);
