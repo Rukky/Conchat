@@ -1,4 +1,8 @@
 //Require the node cluster modules
+//https://stackoverflow.com/questions/46122290/how-to-make-the-user-enter-a-specific-room-by-typing-its-name-int-the-url-sock //Room  Logic
+//https://www.youtube.com/watch?v=k8o8-Q_-Qfk&list=PLw5h0DiJ-9PC7yXgSPse8NNROMKmjsxts //Whispers, MongoDB, username
+//https://stackoverflow.com/questions/18310635/scaling-socket-io-to-multiple-node-js-processes-using-cluster //scaling with clusters
+//	https://nodejs.org/api/cluster.html //Clusters
 var cluster = require('cluster');
 //Cluster workers based on the number of cores on the CPU
 const numCPUs = require('os').cpus().length;
@@ -53,10 +57,6 @@ for (let i = 0; i < numCPUs; i++) {
             message: String,
             Room: String,
           });
-<<<<<<< HEAD
-=======
-
->>>>>>> 15a1ce307d9cabf4fdb1ac27ae0613a1ce127390
           var Chat = mongoose.model('Message', chatSchema);
 
 
@@ -97,7 +97,6 @@ for (let i = 0; i < numCPUs; i++) {
 // authenticates with the anti spam module and emits an event to the client
              socket.on('addUser', function (data, callback) {
                var room = socket.room
-               Users.findOne
              if (data in users){
                callback(false);
              } else {
@@ -106,20 +105,11 @@ for (let i = 0; i < numCPUs; i++) {
               users[socket.username] = socket;
                  socket.broadcast.to(room).emit('user joined', {
                    username: socket.username});
-<<<<<<< HEAD
-=======
-                   var query = Chat.find({Room:room});
-                   query.sort({Time:-1}).limit(100).exec(function(err, docs){
-                    if(err) throw err;
-                    socket.emit('Load Stored Messages', docs);
-                  });
->>>>>>> 15a1ce307d9cabf4fdb1ac27ae0613a1ce127390
               socketAntiSpam.authenticate(socket);
             }
             var query = Chat.find({Room:room});
             query.sort({Time:-1}).limit(100).exec(function(err, docs){
              if(err) throw err;
-             console.log('sending stored messages')
              socket.emit('Load Stored Messages', docs);
            });
                 });
@@ -139,7 +129,7 @@ for (let i = 0; i < numCPUs; i++) {
               socket.on('join', function(room){
                  socket.join(room);
                  socket.room = room;
-                 socket.emit('you joined')
+                 socket.emit('you joined');
              });
 
              //This even checks if a message is private or not
@@ -187,19 +177,16 @@ for (let i = 0; i < numCPUs; i++) {
 //when a socket disconnects, remove the username from our username array and tell
 //users in the room that someone has disconnected.
               socket.on('disconnect', function () {
-               //May be do some authorization
                socket.broadcast.to(socket.room).emit('user left', {
                  username:socket.username
                })
                delete users[socket.username];
                socket.leave(socket.room);
-               console.log(socket.id, "left", socket.room);
            });
 
 //When a user sends too many messages and gets kicked inform them
            socketAntiSpam.event.on('kick', (socket, data) => {
            socket.emit('User Kicked');
-           console.log(cluster.worker.id);
          });
          //when a user gets banned inform them
            socketAntiSpam.event.on('ban', (socket, data) => {

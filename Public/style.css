@@ -5,9 +5,14 @@
 #chatWrap, #QRtext{
  display: none
 }
-#messages li:nth-child(odd) { background: #cfd8dc; }
+
+.messages li:nth-child(odd) { background: #cfd8dc; 
+  overflow-y: scroll;}
 .username .message{
  font-size: 30px
+}
+#messages{
+  padding-bottom: 10%
 }
 #MessageInput{
  background: #000;

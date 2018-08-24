@@ -2,11 +2,12 @@
   $(function(){
     //connect to our socket, this seems to not be needed on windows
   var socket = io(
-     'ws://rukkys-mac:8000', {transports: ['websocket']}
+     'ws://localhost:8000', {transports: ['websocket']}
  );
  socket.on('connect', function(){
   socket.emit( "join", location.pathname);
  })
+ https://github.com/socketio/socket.io/blob/master/examples/chat/public/main.js
  //Our variable declarations for HTML elements
  var $userError = $('#UserError');
  var $messages = $('.messages');
@@ -80,8 +81,9 @@ socket.on('user joined', (data) => {
 
 //Show this message when a user is kicked
  socket.on('User Kicked',function(data){
-   log("You have been kicked for spamming! You may reconnect, but leave the spam behind!")
+   log("You have been kicked for spamming! You may reconnect but leave the spam behind!")
  });
+
 
 //Show this message when a user is banned
  socket.on('User Banned', function(data){
@@ -131,7 +133,7 @@ socket.on('user joined', (data) => {
    const addMessageElement = function (el) {
        var $el = $(el);
          $messages.append($el);
-       $messages[0].scrollTop = $messages[0].scrollHeight;
+         $messages[0].scrollTop = $messages[0].scrollHeight;
      }
 
      //This appends messages from the server to the chatroom
